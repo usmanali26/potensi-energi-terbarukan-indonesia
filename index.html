@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>PETA SEBARAN POTENSI ENERGI TERBARUKAN INDONESIA</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="data/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-12.141610779071748,92.27508674509482],[11.848114619486644,140.62551267724086]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMPR'] !== null ? autolinker.link(feature.properties['WADMPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Potensi Energi Terbarukan (MW):</th>\
+                        <td>' + (feature.properties['Potensi_En'] !== null ? autolinker.link(feature.properties['Potensi_En'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kapasitas Terpasang (MW):</th>\
+                        <td>' + (feature.properties['KAP_TRPSNG'] !== null ? autolinker.link(feature.properties['KAP_TRPSNG'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Rencana Umum Daerah (MW): </th>\
+                        <td>' + (feature.properties['REN_UMUM_D'] !== null ? autolinker.link(feature.properties['REN_UMUM_D'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_0(feature) {
+            switch(String(feature.properties['WADMPR'])) {
+                case 'Aceh':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(44,157,238,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Bali':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(35,233,193,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Banten':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,195,119,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Bengkulu':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(22,232,92,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Daerah Istimewa Yogyakarta':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(171,84,221,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DKI Jakarta':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,165,58,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Gorontalo':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,115,23,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jambi':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,123,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jawa Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(30,213,36,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jawa Tengah':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(16,205,196,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jawa Timur':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(102,192,202,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalimantan Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,58,214,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalimantan Selatan':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,73,210,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalimantan Tengah':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,104,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalimantan Timur':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(35,29,211,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalimantan Utara':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(79,118,217,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kepulauan Bangka Belitung':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(22,204,140,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kepulauan Riau':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(123,97,238,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Lampung':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,39,147,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Maluku':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(114,215,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Maluku Utara':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(119,239,177,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Nusa Tenggara Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(53,76,229,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Nusa Tenggara Timur':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(207,125,84,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(111,233,134,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,200,105,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua Barat Daya':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,53,121,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua Pegunungan':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(209,232,31,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua Selatan':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(177,234,22,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Papua Tengah':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,125,152,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Riau':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,51,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sulawesi Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,133,205,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sulawesi Selatan':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,183,106,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sulawesi Tengah':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,52,49,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sulawesi Tenggara':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(46,166,209,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sulawesi Utara':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(140,94,233,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumatera Barat':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(140,229,16,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumatera Selatan':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,104,83,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumatera Utara':
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,127,201,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(75,214,57,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1');
+        map.getPane('pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1').style.zIndex = 401;
+        map.getPane('pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1').style['mix-blend-mode'] = 'normal';
+        var layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1 = new L.geoJson(json_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+            layerName: 'layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+            pane: 'pane_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1',
+            onEachFeature: pop_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1,
+            style: style_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_0,
+        });
+        bounds_group.addLayer(layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1);
+        map.addLayer(layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1);
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: '[LapakGIS.com] Batas_Provinsi_BIG_PPBW_38_Prov<br /><table><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Aceh0.png" /></td><td>Aceh</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Bali1.png" /></td><td>Bali</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Banten2.png" /></td><td>Banten</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Bengkulu3.png" /></td><td>Bengkulu</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_DaerahIstimewaYogyakarta4.png" /></td><td>Daerah Istimewa Yogyakarta</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_DKIJakarta5.png" /></td><td>DKI Jakarta</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Gorontalo6.png" /></td><td>Gorontalo</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Jambi7.png" /></td><td>Jambi</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_JawaBarat8.png" /></td><td>Jawa Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_JawaTengah9.png" /></td><td>Jawa Tengah</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_JawaTimur10.png" /></td><td>Jawa Timur</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KalimantanBarat11.png" /></td><td>Kalimantan Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KalimantanSelatan12.png" /></td><td>Kalimantan Selatan</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KalimantanTengah13.png" /></td><td>Kalimantan Tengah</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KalimantanTimur14.png" /></td><td>Kalimantan Timur</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KalimantanUtara15.png" /></td><td>Kalimantan Utara</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KepulauanBangkaBelitung16.png" /></td><td>Kepulauan Bangka Belitung</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_KepulauanRiau17.png" /></td><td>Kepulauan Riau</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Lampung18.png" /></td><td>Lampung</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Maluku19.png" /></td><td>Maluku</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_MalukuUtara20.png" /></td><td>Maluku Utara</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_NusaTenggaraBarat21.png" /></td><td>Nusa Tenggara Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_NusaTenggaraTimur22.png" /></td><td>Nusa Tenggara Timur</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Papua23.png" /></td><td>Papua</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_PapuaBarat24.png" /></td><td>Papua Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_PapuaBaratDaya25.png" /></td><td>Papua Barat Daya</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_PapuaPegunungan26.png" /></td><td>Papua Pegunungan</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_PapuaSelatan27.png" /></td><td>Papua Selatan</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_PapuaTengah28.png" /></td><td>Papua Tengah</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_Riau29.png" /></td><td>Riau</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SulawesiBarat30.png" /></td><td>Sulawesi Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SulawesiSelatan31.png" /></td><td>Sulawesi Selatan</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SulawesiTengah32.png" /></td><td>Sulawesi Tengah</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SulawesiTenggara33.png" /></td><td>Sulawesi Tenggara</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SulawesiUtara34.png" /></td><td>Sulawesi Utara</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SumateraBarat35.png" /></td><td>Sumatera Barat</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SumateraSelatan36.png" /></td><td>Sumatera Selatan</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_SumateraUtara37.png" /></td><td>Sumatera Utara</td></tr><tr><td style="text-align: center;"><img src="legend/LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1_38.png" /></td><td></td></tr></table>', layer: layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1},
+            {label: "OSM Standard", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['WADMPR'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['WADMPR']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1]);
+        map.on("zoomend", function(){
+            resetLabels([layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_LapakGIScomBatas_Provinsi_BIG_PPBW_38_Prov_1]);
+        });
+        </script>
+    </body>
+</html>
